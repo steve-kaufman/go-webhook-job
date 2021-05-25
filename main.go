@@ -6,9 +6,11 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/steve-kaufman/go-webook-job/loop"
 )
 
-func main() {
+func getInterval() int {
 	intervalStr := os.Getenv("JOB_INTERVAL")
 	if intervalStr == "" {
 		panic("$JOB_INTERVAL must be set")
@@ -18,38 +20,35 @@ func main() {
 		panic("$JOB_INTERVAL must be an int")
 	}
 
+	return interval
+}
+
+func getURL() string {
 	url := os.Getenv("JOB_URL")
 	if url == "" {
 		panic("$JOB_URL must be set")
 	}
-
-	loop(interval, url)
+	return url
 }
 
-func loop(interval int, url string) {
-	lastTime := time.Now().Unix()
-	elapsedMinutes := 0
+func main() {
+	interval := time.Duration(getInterval())
+	url := getURL()
 
-	for {
-		now := time.Now().Unix()
-
-		secSinceLastTime := now - lastTime
-		elapsedMinutes += int(secSinceLastTime) / 60
-
-		if elapsedMinutes >= interval {
-			webhook(url)
-			elapsedMinutes = 0
-		}
-
-		time.Sleep(time.Minute)
-		lastTime = now
-	}
+	loop := loop.New(interval, func() {
+		webhook(url)
+	})
+	loop.Start()
 }
 
 func webhook(url string) {
+	println("Sending POST to:", url)
 	_, err := http.Post(url, "", nil)
 
 	if err != nil {
 		log.Println(err)
+		return
 	}
+
+	println("Done")
 }
