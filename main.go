@@ -4,18 +4,17 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/steve-kaufman/go-webook-job/loop"
 )
 
-func getInterval() int {
+func getInterval() time.Duration {
 	intervalStr := os.Getenv("JOB_INTERVAL")
 	if intervalStr == "" {
 		panic("$JOB_INTERVAL must be set")
 	}
-	interval, err := strconv.Atoi(intervalStr)
+	interval, err := time.ParseDuration(intervalStr)
 	if err != nil {
 		panic("$JOB_INTERVAL must be an int")
 	}
@@ -24,15 +23,15 @@ func getInterval() int {
 }
 
 func getURL() string {
-	url := os.Getenv("JOB_URL")
+	url := os.Getenv("HOOK_URL")
 	if url == "" {
-		panic("$JOB_URL must be set")
+		panic("$HOOK_URL must be set")
 	}
 	return url
 }
 
 func main() {
-	interval := time.Duration(getInterval())
+	interval := getInterval()
 	url := getURL()
 
 	loop := loop.New(interval, func() {
