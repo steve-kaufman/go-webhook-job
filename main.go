@@ -36,20 +36,29 @@ func getBody() string {
 	return body
 }
 
+func getContentType() string {
+	contentType := os.Getenv("HOOK_CONTENT_TYPE")
+	if contentType == "" {
+		contentType = "text/plain"
+	}
+	return contentType
+}
+
 func main() {
 	interval := getInterval()
 	url := getURL()
 	body := getBody()
+	contentType := getContentType()
 
 	loop := loop.New(interval, func() {
-		webhook(url, body)
+		webhook(url, body, contentType)
 	})
 	loop.Start()
 }
 
-func webhook(url string, body string) {
+func webhook(url string, body string, contentType string) {
 	println("Sending POST to:", url)
-	_, err := http.Post(url, "", bytes.NewBufferString(body))
+	_, err := http.Post(url, contentType, bytes.NewBufferString(body))
 
 	if err != nil {
 		log.Println(err)
