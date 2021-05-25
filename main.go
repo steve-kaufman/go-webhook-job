@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"log"
 	"net/http"
 	"os"
@@ -30,19 +31,25 @@ func getURL() string {
 	return url
 }
 
+func getBody() string {
+	body := os.Args[1]
+	return body
+}
+
 func main() {
 	interval := getInterval()
 	url := getURL()
+	body := getBody()
 
 	loop := loop.New(interval, func() {
-		webhook(url)
+		webhook(url, body)
 	})
 	loop.Start()
 }
 
-func webhook(url string) {
+func webhook(url string, body string) {
 	println("Sending POST to:", url)
-	_, err := http.Post(url, "", nil)
+	_, err := http.Post(url, "", bytes.NewBufferString(body))
 
 	if err != nil {
 		log.Println(err)

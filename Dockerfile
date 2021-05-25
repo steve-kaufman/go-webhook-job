@@ -21,4 +21,4 @@ COPY --from=builder /lib/ld-musl-x86_64.so.1  /lib/
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-CMD [ "/bin/go-webhook-job" ]
+ENTRYPOINT [ "/bin/go-webhook-job" ]
